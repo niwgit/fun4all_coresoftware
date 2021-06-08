@@ -17,6 +17,8 @@
 
 #include <g4decayer/EDecayType.hh>
 #include <g4decayer/P6DExtDecayerPhysics.hh>
+#include <g4eicdirc/PrtCherenkovProcess.h>
+#include <g4eicdirc/PrtOpBoundaryProcess.h>
 
 #include <phgeom/PHGeomUtility.h>
 
@@ -456,7 +458,14 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
 
   // add cerenkov and optical photon processes
   // cout << endl << "Ignore the next message - we implemented this correctly" << endl;
-  G4Cerenkov *theCerenkovProcess = new G4Cerenkov("Cerenkov");
+  //G4Cerenkov *theCerenkovProcess = new G4Cerenkov("Cerenkov");
+  G4Cerenkov* fCerenkovProcess           = new G4Cerenkov("Cerenkov");
+  PrtCherenkovProcess* fCerenkovProcess0          = new PrtCherenkovProcess("Cerenkov");
+  G4OpAbsorption* fAbsorptionProcess         = new G4OpAbsorption();
+  G4OpRayleigh* fRayleighScatteringProcess = new G4OpRayleigh();
+  G4OpMieHG* fMieHGScatteringProcess    = new G4OpMieHG();
+  PrtOpBoundaryProcess* fBoundaryProcess           = new PrtOpBoundaryProcess();
+
   // cout << "End of bogus warning message" << endl << endl;
   G4Scintillation* theScintillationProcess      = new G4Scintillation("Scintillation");
 
@@ -467,18 +476,28 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
     theCerenkovProcess->DumpPhysicsTable();
     }
   */
-  theCerenkovProcess->SetMaxNumPhotonsPerStep(300);
-  theCerenkovProcess->SetMaxBetaChangePerStep(10.0);
-  theCerenkovProcess->SetTrackSecondariesFirst(false);  // current PHG4TruthTrackingAction does not support suspect active track and track secondary first
+  //theCerenkovProcess->SetMaxNumPhotonsPerStep(300);
+  //theCerenkovProcess->SetMaxBetaChangePerStep(10.0);
+  //theCerenkovProcess->SetTrackSecondariesFirst(false);  // current PHG4TruthTrackingAction does not support suspect active track and track secondary first
+
+  fCerenkovProcess->SetMaxNumPhotonsPerStep(20);
+  fCerenkovProcess->SetMaxBetaChangePerStep(10.0);
+  fCerenkovProcess->SetTrackSecondariesFirst(true);
+
+  cout << "Cerenkov process added" << endl;
+
+  fCerenkovProcess0->SetMaxNumPhotonsPerStep(20);
+  fCerenkovProcess0->SetMaxBetaChangePerStep(10.0);
+  fCerenkovProcess0->SetTrackSecondariesFirst(true);
 
   theScintillationProcess->SetScintillationYieldFactor(1.0);
-  theScintillationProcess->SetTrackSecondariesFirst(false);
+  theScintillationProcess->SetTrackSecondariesFirst(true);
   // theScintillationProcess->SetScintillationExcitationRatio(1.0);
 
   // Use Birks Correction in the Scintillation process
 
-  // G4EmSaturation* emSaturation = G4LossTableManager::Instance()->EmSaturation();
-  // theScintillationProcess->AddSaturation(emSaturation);
+  G4EmSaturation* emSaturation = G4LossTableManager::Instance()->EmSaturation();
+  theScintillationProcess->AddSaturation(emSaturation);
 
   G4ParticleTable *theParticleTable = G4ParticleTable::GetParticleTable();
   G4ParticleTable::G4PTblDicIterator *_theParticleIterator;
@@ -489,26 +508,37 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
     G4ParticleDefinition *particle = _theParticleIterator->value();
     G4String particleName = particle->GetParticleName();
     G4ProcessManager *pmanager = particle->GetProcessManager();
-    if (theCerenkovProcess->IsApplicable(*particle))
+    if (fCerenkovProcess->IsApplicable(*particle))
     {
-      pmanager->AddProcess(theCerenkovProcess);
-      pmanager->SetProcessOrdering(theCerenkovProcess, idxPostStep);
+      pmanager->AddProcess(fCerenkovProcess);
+      pmanager->SetProcessOrdering(fCerenkovProcess, idxPostStep);
     }
+  
     if (theScintillationProcess->IsApplicable(*particle))
     {
-      pmanager->AddProcess(theScintillationProcess);
-      pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
-      pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
+      //pmanager->AddProcess(theScintillationProcess);
+      //pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
+      //pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
     }
-  }
-  G4ProcessManager *pmanager = G4OpticalPhoton::OpticalPhoton()->GetProcessManager();
+
+
+  //G4ProcessManager *pmanager = G4OpticalPhoton::OpticalPhoton()->GetProcessManager();
   // std::cout << " AddDiscreteProcess to OpticalPhoton " << std::endl;
-  pmanager->AddDiscreteProcess(new G4OpAbsorption());
+  /*pmanager->AddDiscreteProcess(new G4OpAbsorption());
   pmanager->AddDiscreteProcess(new G4OpRayleigh());
   pmanager->AddDiscreteProcess(new G4OpMieHG());
   pmanager->AddDiscreteProcess(new G4OpBoundaryProcess());
   pmanager->AddDiscreteProcess(new G4OpWLS());
-  pmanager->AddDiscreteProcess(new G4PhotoElectricEffect());
+  pmanager->AddDiscreteProcess(new G4PhotoElectricEffect());*/
+
+if (particleName == "opticalphoton") {
+  G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
+  pmanager->AddDiscreteProcess(fAbsorptionProcess);
+  pmanager->AddDiscreteProcess(fRayleighScatteringProcess);
+  pmanager->AddDiscreteProcess(fMieHGScatteringProcess);
+  pmanager->AddDiscreteProcess(fBoundaryProcess);
+ }
+  }
   // pmanager->DumpInfo();
 
   // needs large amount of memory which kills central hijing events
