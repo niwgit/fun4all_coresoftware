@@ -544,25 +544,26 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
       //pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
       //pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
     }
+  
 
-
-  //G4ProcessManager *pmanager = G4OpticalPhoton::OpticalPhoton()->GetProcessManager();
-  // std::cout << " AddDiscreteProcess to OpticalPhoton " << std::endl;
-  /*pmanager->AddDiscreteProcess(new G4OpAbsorption());
+    /*G4ProcessManager *pmanager = G4OpticalPhoton::OpticalPhoton()->GetProcessManager();
+  std::cout << " AddDiscreteProcess to OpticalPhoton " << std::endl;
+  pmanager->AddDiscreteProcess(new G4OpAbsorption());
   pmanager->AddDiscreteProcess(new G4OpRayleigh());
   pmanager->AddDiscreteProcess(new G4OpMieHG());
   pmanager->AddDiscreteProcess(new G4OpBoundaryProcess());
   pmanager->AddDiscreteProcess(new G4OpWLS());
-  pmanager->AddDiscreteProcess(new G4PhotoElectricEffect());*/
-
-if (particleName == "opticalphoton") {
+  pmanager->AddDiscreteProcess(new G4PhotoElectricEffect());
+    */
+  if (particleName == "opticalphoton") {
   G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
   pmanager->AddDiscreteProcess(fAbsorptionProcess);
   pmanager->AddDiscreteProcess(fRayleighScatteringProcess);
   pmanager->AddDiscreteProcess(fMieHGScatteringProcess);
   pmanager->AddDiscreteProcess(fBoundaryProcess);
- }
   }
+  }
+  
   // pmanager->DumpInfo();
 
   // needs large amount of memory which kills central hijing events
