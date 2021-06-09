@@ -7,6 +7,7 @@
 #include "PHG4PhenixDetector.h"
 #include "PHG4PhenixDisplayAction.h"
 #include "PHG4PhenixEventAction.h"
+#include "PHG4PhenixStackingAction.h"
 #include "PHG4PhenixSteppingAction.h"
 #include "PHG4PhenixTrackingAction.h"
 #include "PHG4PrimaryGeneratorAction.h"
@@ -111,6 +112,7 @@ class G4TrackingManager;
 class G4VPhysicalVolume;
 class PHField;
 class PHG4EventAction;
+class PHG4StackingAction;
 class PHG4SteppingAction;
 
 using namespace std;
@@ -118,7 +120,6 @@ using namespace std;
 //_________________________________________________________________
 PHG4Reco::PHG4Reco(const string &name)
   : SubsysReco(name)
-  , m_MagneticField(0.)
   , m_MagneticFieldRescale(1.0)
   , m_Field(nullptr)
   , m_RunManager(nullptr)
@@ -254,6 +255,7 @@ int PHG4Reco::Init(PHCompositeNode *topNode)
   {
     cout << "Physics List " << m_PhysicsList << " not implemented" << endl;
     gSystem->Exit(1);
+    exit(1);
   }
 
   if (m_ActiveDecayerFlag)
@@ -408,6 +410,28 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
   if (not m_disableUserActions)
   {
     m_RunManager->SetUserAction(m_EventAction);
+  }
+
+  // create main stepping action, add subsystems and register to GEANT
+  m_StackingAction = new PHG4PhenixStackingAction();
+  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)
+  {
+    cout << "checking stacking action for " << g4sub->Name() << endl;
+    PHG4StackingAction *action = g4sub->GetStackingAction();
+    if (action)
+    {
+//      if (Verbosity() > 1)
+      {
+        cout << "Adding steppingaction for " << g4sub->Name() << endl;
+      }
+
+      m_StackingAction->AddAction(g4sub->GetStackingAction());
+    }
+  }
+
+  if (not m_disableUserActions)
+  {
+    m_RunManager->SetUserAction(m_StackingAction);
   }
 
   // create main stepping action, add subsystems and register to GEANT

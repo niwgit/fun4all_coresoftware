@@ -72,7 +72,6 @@ int PHActsInitialVertexFinder::Process(PHCompositeNode *topNode)
     std::cout << "PHActsInitialVertexFinder processing event " 
 	      << m_event << std::endl;
 
-
   if(m_trackMap->size() == 0)
     {
       std::cout << PHWHERE 
@@ -98,8 +97,7 @@ int PHActsInitialVertexFinder::Process(PHCompositeNode *topNode)
 	  delete track;
 	}
     }
-
-  if(Verbosity() > 0)
+ if(Verbosity() > 0)
     std::cout << "PHActsInitialVertexFinder processed event "
 	      << m_event << std::endl;
 
@@ -210,7 +208,7 @@ void PHActsInitialVertexFinder::fillVertexMap(VertexVector& vertices,
       svtxVertex->set_t0(vertex.time());
       svtxVertex->set_id(vertexId);
           
-      for(const auto track : vertex.tracks())
+      for(const auto& track : vertex.tracks())
 	{
 	  const auto originalParams = track.originalParams;
 
@@ -420,7 +418,6 @@ std::vector<SvtxTrack*> PHActsInitialVertexFinder::sortTracks()
 	  index = indices(m_random_number_generator);
 
       usedIndices.push_back(index);
-
       centroid = m_trackMap->get(index)->get_z();
       
       if(Verbosity() > 3)
@@ -496,12 +493,21 @@ CentroidMap& clusters, std::vector<float>& centroids)
 	      sortedTracks.push_back(track);
 	    }
 	  else
-	    if(Verbosity() > 3)
-	      std::cout << "Not adding track with z " << z 
-			<< " as it is incompatible with centroid " 
-			<< centroids.at(centroidIndex) 
-			<< " with std dev " 
-			<< stddev.at(centroidIndex) << std::endl;
+	    {
+	      if(m_removeSeeds)
+		{
+		  m_trackMap->erase(track->get_id());
+		}
+
+	      if(Verbosity() > 3)
+		{
+		  std::cout << "Not adding track with z " << z 
+			    << " as it is incompatible with centroid " 
+			    << centroids.at(centroidIndex) 
+			    << " with std dev " 
+			    << stddev.at(centroidIndex) << std::endl;
+		}
+	    }
 	}
     }
 
@@ -610,9 +616,16 @@ TrackParamVec PHActsInitialVertexFinder::getTrackPointers(InitKeyMap& keyMap)
     {
       m_nCentroids = 1;
     }
-  
-  auto sortedTracks = sortTracks();
-
+  std::vector<SvtxTrack*> sortedTracks;
+  if(m_svtxTrackMapName.find("silicon") != std::string::npos)
+    {
+      sortedTracks = sortTracks();
+    }
+  else
+    {
+      for(const auto& [key, track] : *m_trackMap)
+	sortedTracks.push_back(track);
+    }
   for(const auto& track : sortedTracks)
     {
       if(Verbosity() > 3)

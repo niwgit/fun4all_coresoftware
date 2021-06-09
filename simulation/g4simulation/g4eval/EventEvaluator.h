@@ -14,6 +14,8 @@
 
 class CaloEvalStack;
 class PHCompositeNode;
+class PHHepMCGenEventMap;
+class PHHepMCGenEvent;
 class TFile;
 class TNtuple;
 class TTree;  //Added by Barak
@@ -29,18 +31,19 @@ class TTree;  //Added by Barak
 class EventEvaluator : public SubsysReco
 {
  public:
-  enum class TrackSource_t: unsigned short {
-      all = 0,
-      inner = 1
+  enum class TrackSource_t : unsigned short
+  {
+    all = 0,
+    inner = 1
   };
 
   EventEvaluator(const std::string& name = "EventEvaluator",
                  const std::string& filename = "g4eval_cemc.root");
-  virtual ~EventEvaluator(){};
+  ~EventEvaluator() override{};
 
-  int Init(PHCompositeNode* topNode);
-  int process_event(PHCompositeNode* topNode);
-  int End(PHCompositeNode* topNode);
+  int Init(PHCompositeNode* topNode) override;
+  int process_event(PHCompositeNode* topNode) override;
+  int End(PHCompositeNode* topNode) override;
 
   void set_strict(bool b) { _strict = b; }
 
@@ -58,6 +61,8 @@ class EventEvaluator : public SubsysReco
   void set_do_VERTEX(bool b) { _do_VERTEX = b; }
   void set_do_PROJECTIONS(bool b) { _do_PROJECTIONS = b; }
   void set_do_MCPARTICLES(bool b) { _do_MCPARTICLES = b; }
+  void set_do_HEPMC(bool b) { _do_HEPMC = b; }
+  void set_do_GEOMETRY(bool b) { _do_GEOMETRY = b; }
   // funtions to limit the tracing to only part of the event ---------
   // and speed up the evaluation
 
@@ -69,7 +74,13 @@ class EventEvaluator : public SubsysReco
     _reco_e_threshold = thresh;
   }
 
-private:
+  //! max depth/generation of the MC_particle/PHG4Particle that would be saved.
+  void set_depth_MCstack(int d)
+  {
+    _depth_MCstack = d;
+  }
+
+ private:
   bool _do_FHCAL;
   bool _do_HCALIN;
   bool _do_HCALOUT;
@@ -84,6 +95,8 @@ private:
   bool _do_VERTEX;
   bool _do_PROJECTIONS;
   bool _do_MCPARTICLES;
+  bool _do_HEPMC;
+  bool _do_GEOMETRY;
   unsigned int _ievent;
 
   // track hits
@@ -121,7 +134,7 @@ private:
   int* _tower_EHCAL_iEta;
   int* _tower_EHCAL_iPhi;
   int* _tower_EHCAL_trueID;
-  
+
   int _nTowers_DRCALO;
   float* _tower_DRCALO_E;
   int* _tower_DRCALO_NScint;
@@ -147,7 +160,7 @@ private:
   int* _tower_CEMC_iEta;
   int* _tower_CEMC_iPhi;
   int* _tower_CEMC_trueID;
-  
+
   // clusters
   int _nclusters_FHCAL;
   float* _cluster_FHCAL_E;
@@ -176,7 +189,7 @@ private:
   float* _cluster_EHCAL_Phi;
   int* _cluster_EHCAL_NTower;
   int* _cluster_EHCAL_trueID;
-  
+
   int _nclusters_FEMC;
   float* _cluster_FEMC_E;
   float* _cluster_FEMC_Eta;
@@ -197,7 +210,7 @@ private:
   float* _cluster_EEMC_Phi;
   int* _cluster_EEMC_NTower;
   int* _cluster_EEMC_trueID;
-  
+
   // vertex
   float _vertex_x;
   float _vertex_y;
@@ -237,18 +250,46 @@ private:
   float* _mcpart_px;
   float* _mcpart_py;
   float* _mcpart_pz;
+  int* _mcpart_BCID;
+
+  // MC particles
+  int _nHepmcp;
+  int _hepmcp_procid;
+  float _hepmcp_x1;
+  float _hepmcp_x2;
+  //  float* _hepmcp_ID_parent;
+  float* _hepmcp_status;
+  float* _hepmcp_PDG;
+  float* _hepmcp_E;
+  float* _hepmcp_px;
+  float* _hepmcp_py;
+  float* _hepmcp_pz;
+  int* _hepmcp_m1;
+  int* _hepmcp_m2;
+  int* _hepmcp_BCID;
+
+
+  int _calo_ID;
+  int _calo_towers_N;
+  int* _calo_towers_iEta;
+  int* _calo_towers_iPhi;
+  float* _calo_towers_Eta;
+  float* _calo_towers_Phi;
+  float* _calo_towers_x;
+  float* _calo_towers_y;
+  float* _calo_towers_z;
 
   float _reco_e_threshold;
   int _depth_MCstack;
 
-  CaloEvalStack *_caloevalstackFHCAL;
-  CaloEvalStack *_caloevalstackHCALIN;
-  CaloEvalStack *_caloevalstackHCALOUT;
-  CaloEvalStack *_caloevalstackEHCAL;
-  CaloEvalStack *_caloevalstackDRCALO;
-  CaloEvalStack *_caloevalstackFEMC;
-  CaloEvalStack *_caloevalstackCEMC;
-  CaloEvalStack *_caloevalstackEEMC;
+  CaloEvalStack* _caloevalstackFHCAL;
+  CaloEvalStack* _caloevalstackHCALIN;
+  CaloEvalStack* _caloevalstackHCALOUT;
+  CaloEvalStack* _caloevalstackEHCAL;
+  CaloEvalStack* _caloevalstackDRCALO;
+  CaloEvalStack* _caloevalstackFEMC;
+  CaloEvalStack* _caloevalstackCEMC;
+  CaloEvalStack* _caloevalstackEEMC;
 
   //----------------------------------
   // evaluator output ntuples
@@ -256,10 +297,12 @@ private:
   bool _strict;
 
   TTree* _event_tree;  //Added by Barak
+  TTree* _geometry_tree;  //Added by Barak
 
   // evaluator output file
   std::string _filename;
   TFile* _tfile;
+  TFile* _tfile_geometry;
 
   // subroutines
   int GetProjectionIndex(std::string projname);           ///< return track projection index for given track projection layer
@@ -269,11 +312,24 @@ private:
 
   const int _maxNHits = 5000;
   const int _maxNTowers = 50 * 50;
+  const int _maxNTowersCentral = 2000;
   const int _maxNTowersDR = 3000 * 3000;
+  const int _maxNTowersCalo = 100000;
   const int _maxNclusters = 100;
+  const int _maxNclustersCentral = 2000;
   const int _maxNTracks = 200;
   const int _maxNProjections = 2000;
   const int _maxNMCPart = 100000;
+  const int _maxNHepmcp = 1000;
+
+  enum calotype {
+      kFHCAL         = 0,
+      kFEMC         = 1,
+      kDRCALO        = 2,
+      kEEMC         = 3,
+      kCEMC         = 4
+  };
+
 };
 
 #endif  // G4EVAL_EVENTEVALUATOR_H

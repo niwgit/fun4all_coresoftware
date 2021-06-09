@@ -6,12 +6,13 @@
 #include <trackreco/PHTrackPropagating.h>
 
 #include <string>
+#include <map>
 
 class PHCompositeNode;
 class SvtxTrackMap;
 class SvtxTrack;
 class TF1;
-
+class TpcSeedTrackMap;
 
 class PHSiliconTpcTrackMatching : public PHTrackPropagating
 {
@@ -19,7 +20,7 @@ class PHSiliconTpcTrackMatching : public PHTrackPropagating
 
   PHSiliconTpcTrackMatching(const std::string &name = "PHSiliconTpcTrackMatching");
 
-  virtual ~PHSiliconTpcTrackMatching();
+  ~PHSiliconTpcTrackMatching() override;
 
   void set_track_map_name_silicon(const std::string &map_name) { _track_map_name_silicon = map_name; }
   void set_phi_search_window(const double win){_phi_search_win = win;}
@@ -60,6 +61,9 @@ class PHSiliconTpcTrackMatching : public PHTrackPropagating
   SvtxTrack *_tracklet_tpc{nullptr};
   SvtxTrack *_tracklet_si{nullptr};
 
+  TpcSeedTrackMap *_seed_track_map_class{nullptr};
+  //std::multimap<unsigned int, unsigned int> _seed_track_map;
+ 
   // correction function for PHTpcTracker track phi bias
   TF1 *fdphi{nullptr};
   // default values, can be replaced from the macro

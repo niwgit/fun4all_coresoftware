@@ -40,7 +40,7 @@ class PHActsVertexFinder: public PHInitVertexing
  public:
   PHActsVertexFinder(const std::string &name = "PHActsVertexFinder");
 
-  virtual ~PHActsVertexFinder() {}
+  ~PHActsVertexFinder() override {}
 
   void setMaxVertices(int maxVertices)
     { m_maxVertices = maxVertices; }
@@ -68,6 +68,8 @@ class PHActsVertexFinder: public PHInitVertexing
   
   void updateTrackDCA(const unsigned int trackKey,
 		      const Acts::Vector3D vertex);
+
+  void checkTrackVertexAssociation();
 
   /// An Acts vertex object map
   VertexMap *m_actsVertexMap;
