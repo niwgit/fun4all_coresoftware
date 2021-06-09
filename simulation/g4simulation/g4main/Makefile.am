@@ -59,7 +59,8 @@ libg4testbench_la_LIBADD = \
   -lphg4gdml \
   -lphhepmc \
   -lphparameter \
-  -lvararray 
+  -lvararray \
+  -lg4eicdirc 
 
 # I/O dictionaries have to exist for root5 and root6. For ROOT6 we need
 # pcm files in addition. If someone can figure out how to make a list
