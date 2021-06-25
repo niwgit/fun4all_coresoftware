@@ -4,6 +4,8 @@
 #define MAXLAYER 50
 #define MAXHIT 500000
 
+#include <Rtypes.h>
+
 typedef struct
 {
   // Event Level
@@ -38,7 +40,17 @@ typedef struct
   float y1[MAXHIT];
   float z1[MAXHIT];
   float edep[MAXHIT];
-
+  Int_t mcp_id[MAXHIT];
+  Int_t pixel_id[MAXHIT];
+  Double_t CherenkovMC[MAXHIT];
+  Double_t lead_time[MAXHIT];
+  Double_t wavelength[MAXHIT];
+  Double_t hit_globalPos[MAXHIT][3];
+  Double_t hit_localPos[MAXHIT][3];
+  Double_t hit_digiPos[MAXHIT][3];
+  Double_t hit_mom[MAXHIT][3];
+  Double_t hit_pos[MAXHIT][3];
+  
 } G4EvtTree;
 
 #endif

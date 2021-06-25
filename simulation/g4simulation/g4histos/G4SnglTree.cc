@@ -4,6 +4,7 @@
 #include <g4main/PHG4HitContainer.h>        // for PHG4HitContainer, PHG4Hit...
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
+#include <g4eicdirc/PrtHit.h>
 
 #include <fun4all/SubsysReco.h>             // for SubsysReco
 
@@ -67,7 +68,20 @@ int G4SnglTree::Init(PHCompositeNode *)
   g4tree->Branch("y1", mG4EvtTree.y1, "y1[nhits]/F");
   g4tree->Branch("z1", mG4EvtTree.z1, "z1[nhits]/F");
   g4tree->Branch("edep", mG4EvtTree.edep, "edep[nhits]/F");
+  g4tree->Branch("edep", mG4EvtTree.edep, "edep[nhits]/I");
 
+  g4tree->Branch("mcp_id", mG4EvtTree.mcp_id, "mcp_id[nhits]/I");
+  g4tree->Branch("pixel_id", mG4EvtTree.pixel_id, "pixel_id[nhits]/I");
+  g4tree->Branch("CherenkovMC", mG4EvtTree.CherenkovMC, "CherenkovMC[nhits]/D");
+  g4tree->Branch("lead_time", mG4EvtTree.lead_time,"lead_time[nhits]/D");
+  g4tree->Branch("wavelength", mG4EvtTree.wavelength,"wavelength[nhits]/D");
+
+  g4tree->Branch("hit_globalPos", mG4EvtTree.hit_globalPos, "hit_globalPos[nhits][3]/D");
+  g4tree->Branch("hit_localPos", mG4EvtTree.hit_localPos, "hit_localPos[nhits][3]/D");
+  g4tree->Branch("hit_digiPos", mG4EvtTree.hit_digiPos, "hit_digiPos[nhits][3]/D");
+  g4tree->Branch("hit_mom", mG4EvtTree.hit_mom, "hit_mom[nhits][3]/D");
+  g4tree->Branch("hit_pos", mG4EvtTree.hit_pos, "hit_pos[nhits][3]/D");
+  
   return 0;
 }
 
@@ -120,6 +134,11 @@ int G4SnglTree::process_event(PHCompositeNode *topNode)
     {
       mG4EvtTree.hcalabsLayers = process_hit(hits, "G4HIT_ABSORBER_HCAL", detid, nhits);
     }
+    else if (!strcmp("G4HIT_DIRC", nodename.str().c_str())) // DIRC
+      {
+	process_hit(hits, "G4HIT_DIRC", detid, nhits);
+      }
+	
   }
 
   mG4EvtTree.nhits = nhits;
@@ -158,7 +177,38 @@ int G4SnglTree::process_hit(PHG4HitContainer *hits, const string &dName, int det
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
     {
-      layer_edep_map[hit_iter->second->get_layer()] += hit_iter->second->get_edep();
+      PrtHit *dirc_hit = dynamic_cast<PrtHit*>(hit_iter->second);
+
+      layer_edep_map[dirc_hit->get_layer()] += dirc_hit->get_edep();
+      mG4EvtTree.detid[nhits] = detid;
+      mG4EvtTree.layer[nhits] = dirc_hit->get_layer();
+      mG4EvtTree.hitid[nhits] = dirc_hit->get_hit_id();
+      mG4EvtTree.trkid[nhits] = dirc_hit->get_trkid();
+      mG4EvtTree.scintid[nhits] = dirc_hit->get_scint_id();
+      mG4EvtTree.x0[nhits] = dirc_hit->get_x(0);
+      mG4EvtTree.y0[nhits] = dirc_hit->get_y(0);
+      mG4EvtTree.z0[nhits] = dirc_hit->get_z(0);
+      mG4EvtTree.x1[nhits] = dirc_hit->get_x(1);
+      mG4EvtTree.y1[nhits] = dirc_hit->get_y(1);
+      mG4EvtTree.z1[nhits] = dirc_hit->get_z(1);
+      mG4EvtTree.edep[nhits] = dirc_hit->get_edep();
+
+      mG4EvtTree.mcp_id[nhits] = dirc_hit->GetMcpId();
+      mG4EvtTree.pixel_id[nhits] = dirc_hit->GetPixelId();
+      mG4EvtTree.CherenkovMC[nhits] = dirc_hit->GetCherenkovMC();
+      mG4EvtTree.lead_time[nhits] = dirc_hit->GetLeadTime();
+      mG4EvtTree.wavelength[nhits] = dirc_hit->GetTotTime();
+
+      for(int i=0; i < 3; i++)
+        {
+          mG4EvtTree.hit_globalPos[nhits][i] = dirc_hit->GetGlobalPos()(i);
+          mG4EvtTree.hit_localPos[nhits][i] = dirc_hit->GetLocalPos()(i);
+          mG4EvtTree.hit_digiPos[nhits][i] = dirc_hit->GetDigiPos()(i);
+          mG4EvtTree.hit_mom[nhits][i] = dirc_hit->GetMomentum()(i);
+          mG4EvtTree.hit_pos[nhits][i] = dirc_hit->GetPosition()(i);
+	}
+
+      /*layer_edep_map[hit_iter->second->get_layer()] += hit_iter->second->get_edep();
       mG4EvtTree.detid[nhits] = detid;
       mG4EvtTree.layer[nhits] = hit_iter->second->get_layer();
       mG4EvtTree.hitid[nhits] = hit_iter->second->get_hit_id();
@@ -171,6 +221,22 @@ int G4SnglTree::process_hit(PHG4HitContainer *hits, const string &dName, int det
       mG4EvtTree.y1[nhits] = hit_iter->second->get_y(1);
       mG4EvtTree.z1[nhits] = hit_iter->second->get_z(1);
       mG4EvtTree.edep[nhits] = hit_iter->second->get_edep();
+
+      mG4EvtTree.mcp_id[nhits] = hit_iter->second->GetMcpId();
+      mG4EvtTree.pixel_id[nhits] = hit_iter->second->GetPixelId();
+      mG4EvtTree.CherenkovMC[nhits] = hit_iter->second->GetCherenkovMC();
+      mG4EvtTree.lead_time[nhits] = hit_iter->second->GetLeadTime();
+      mG4EvtTree.wavelength[nhits] = hit_iter->second->GetTotTime();
+
+      for(int i=0; i < 3; i++)
+	{
+	  mG4EvtTree.hit_globalPos[nhits][i] = hit_iter->second->GetGlobalPos()(i);
+	  mG4EvtTree.hit_localPos[nhits][i] = hit_iter->second->GetLocalPos()(i);
+	  mG4EvtTree.hit_digiPos[nhits][i] = hit_iter->second->GetDigiPos()(i);
+	  mG4EvtTree.hit_mom[nhits][i] = hit_iter->second->GetMomentum()(i);
+	  mG4EvtTree.hit_pos[nhits][i] = hit_iter->second->GetPosition()(i);
+	  }*/
+
       nhits++;
       // esum += hit_iter->second->get_edep();
     }

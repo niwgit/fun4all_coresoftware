@@ -14,7 +14,8 @@ libg4histos_la_LDFLAGS = \
    -lfun4all \
    -lphg4hit \
    -lg4detectors \
-   -lg4testbench
+   -lg4testbench \
+   -lg4eicdirc
 
 AM_CPPFLAGS = \
   -I$(includedir) \
@@ -36,7 +37,8 @@ pkginclude_HEADERS = \
   G4RawTowerTTree.h \
   G4SnglNtuple.h \
   G4SnglTree.h \
-  G4VtxNtuple.h
+  G4VtxNtuple.h \
+  G4EvtTree.h
 
 ROOTDICTS = \
   G4RootHitContainer_Dict.cc \

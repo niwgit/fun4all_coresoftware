@@ -128,6 +128,7 @@ PHG4HitContainer::AddHit(const unsigned int detid, PHG4Hit *newhit)
   return hitmap.insert( std::make_pair( key, newhit ) ).first;
 }
 
+
 PHG4HitContainer::ConstRange PHG4HitContainer::getHits(const unsigned int detid) const
 {
   PHG4HitDefs::keytype detidlong = detid;

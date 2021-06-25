@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <TVector3.h>
 
 // Forward declarations
 class PHCompositeNode;
@@ -37,6 +38,7 @@ class G4SnglTree : public SubsysReco
   int End(PHCompositeNode *) override;
 
   void AddNode(const std::string &name, const int detid = 0);
+
 
  protected:
   int nblocks;

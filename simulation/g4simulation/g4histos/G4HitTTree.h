@@ -29,6 +29,7 @@ class G4HitTTree : public SubsysReco
 
   void SaveHits(const int i = 1) { savehits = i; }
 
+
  protected:
   std::string _detector;
   std::string _outnodename;
