@@ -18,7 +18,6 @@
 
 #include <g4decayer/EDecayType.hh>
 #include <g4decayer/P6DExtDecayerPhysics.hh>
-#include <g4eicdirc/PrtCherenkovProcess.h>
 #include <g4eicdirc/PrtOpBoundaryProcess.h>
 
 #include <phgeom/PHGeomUtility.h>
@@ -482,7 +481,6 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
   // cout << endl << "Ignore the next message - we implemented this correctly" << endl;
   //G4Cerenkov *theCerenkovProcess = new G4Cerenkov("Cerenkov");
   G4Cerenkov* fCerenkovProcess           = new G4Cerenkov("Cerenkov");
-  PrtCherenkovProcess* fCerenkovProcess0          = new PrtCherenkovProcess("Cerenkov");
   G4OpAbsorption* fAbsorptionProcess         = new G4OpAbsorption();
   G4OpRayleigh* fRayleighScatteringProcess = new G4OpRayleigh();
   G4OpMieHG* fMieHGScatteringProcess    = new G4OpMieHG();
@@ -507,10 +505,6 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
   fCerenkovProcess->SetTrackSecondariesFirst(true);
 
   cout << "Cerenkov process added" << endl;
-
-  fCerenkovProcess0->SetMaxNumPhotonsPerStep(20);
-  fCerenkovProcess0->SetMaxBetaChangePerStep(10.0);
-  fCerenkovProcess0->SetTrackSecondariesFirst(true);
 
   theScintillationProcess->SetScintillationYieldFactor(1.0);
   theScintillationProcess->SetTrackSecondariesFirst(true);
