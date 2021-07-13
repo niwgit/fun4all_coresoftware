@@ -75,13 +75,14 @@ int G4SnglTree::Init(PHCompositeNode *)
   g4tree->Branch("CherenkovMC", mG4EvtTree.CherenkovMC, "CherenkovMC[nhits]/D");
   g4tree->Branch("lead_time", mG4EvtTree.lead_time,"lead_time[nhits]/D");
   g4tree->Branch("wavelength", mG4EvtTree.wavelength,"wavelength[nhits]/D");
+  g4tree->Branch("hit_pathId", mG4EvtTree.hit_pathId, "hit_pathId[nhits]/L");
 
   g4tree->Branch("hit_globalPos", mG4EvtTree.hit_globalPos, "hit_globalPos[nhits][3]/D");
   g4tree->Branch("hit_localPos", mG4EvtTree.hit_localPos, "hit_localPos[nhits][3]/D");
   g4tree->Branch("hit_digiPos", mG4EvtTree.hit_digiPos, "hit_digiPos[nhits][3]/D");
   g4tree->Branch("hit_mom", mG4EvtTree.hit_mom, "hit_mom[nhits][3]/D");
   g4tree->Branch("hit_pos", mG4EvtTree.hit_pos, "hit_pos[nhits][3]/D");
-  
+
   return 0;
 }
 
@@ -198,6 +199,7 @@ int G4SnglTree::process_hit(PHG4HitContainer *hits, const string &dName, int det
       mG4EvtTree.CherenkovMC[nhits] = dirc_hit->GetCherenkovMC();
       mG4EvtTree.lead_time[nhits] = dirc_hit->GetLeadTime();
       mG4EvtTree.wavelength[nhits] = dirc_hit->GetTotTime();
+      mG4EvtTree.hit_pathId[nhits] = dirc_hit->GetPathInPrizm();
 
       for(int i=0; i < 3; i++)
         {

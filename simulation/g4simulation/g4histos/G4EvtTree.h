@@ -50,7 +50,8 @@ typedef struct
   Double_t hit_digiPos[MAXHIT][3];
   Double_t hit_mom[MAXHIT][3];
   Double_t hit_pos[MAXHIT][3];
-  
+  Long64_t hit_pathId[MAXHIT];
+
 } G4EvtTree;
 
 #endif
