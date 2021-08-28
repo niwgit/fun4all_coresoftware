@@ -18,7 +18,6 @@
 
 #include <g4decayer/EDecayType.hh>
 #include <g4decayer/P6DExtDecayerPhysics.hh>
-#include <g4eicdirc/PrtOpBoundaryProcess.h>
 
 #include <phgeom/PHGeomUtility.h>
 
@@ -97,7 +96,6 @@
 #include <Geant4/QGSP_INCLXX_HP.hh>
 
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -281,7 +279,7 @@ int PHG4Reco::Init(PHCompositeNode *topNode)
   }
 #endif
   // initialize registered subsystems
-  BOOST_FOREACH (SubsysReco *reco, m_SubsystemList)
+  for (SubsysReco *reco: m_SubsystemList)
   {
     reco->Init(topNode);
   }
@@ -356,7 +354,7 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
   }
 
   // initialize registered subsystems
-  BOOST_FOREACH (SubsysReco *reco, m_SubsystemList)
+  for (SubsysReco *reco: m_SubsystemList)
   {
     if (Verbosity() >= 1)
     {
@@ -377,7 +375,7 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
   m_Detector->SetWorldShape(m_WorldShape);
   m_Detector->SetWorldMaterial(m_WorldMaterial);
 
-  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)
+  for (PHG4Subsystem *g4sub: m_SubsystemList)
   {
     if (g4sub->GetDetector())
     {
@@ -397,7 +395,7 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
   // create main event action, add subsystemts and register to GEANT
   m_EventAction = new PHG4PhenixEventAction();
 
-  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)
+  for (PHG4Subsystem *g4sub: m_SubsystemList)
   {
     PHG4EventAction *evtact = g4sub->GetEventAction();
     if (evtact)
@@ -413,7 +411,7 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
 
   // create main stepping action, add subsystems and register to GEANT
   m_StackingAction = new PHG4PhenixStackingAction();
-  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)
+  for (PHG4Subsystem *g4sub: m_SubsystemList)
   {
     PHG4StackingAction *action = g4sub->GetStackingAction();
     if (action)
@@ -433,7 +431,7 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
 
   // create main stepping action, add subsystems and register to GEANT
   m_SteppingAction = new PHG4PhenixSteppingAction();
-  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)
+  for (PHG4Subsystem *g4sub: m_SubsystemList)
   {
     PHG4SteppingAction *action = g4sub->GetSteppingAction();
     if (action)
@@ -454,7 +452,7 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
 
   // create main tracking action, add subsystems and register to GEANT
   m_TrackingAction = new PHG4PhenixTrackingAction();
-  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)
+  for (PHG4Subsystem *g4sub: m_SubsystemList)
   {
     m_TrackingAction->AddAction(g4sub->GetTrackingAction());
 
@@ -479,13 +477,7 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
 
   // add cerenkov and optical photon processes
   // cout << endl << "Ignore the next message - we implemented this correctly" << endl;
-  //G4Cerenkov *theCerenkovProcess = new G4Cerenkov("Cerenkov");
-  G4Cerenkov* fCerenkovProcess           = new G4Cerenkov("Cerenkov");
-  G4OpAbsorption* fAbsorptionProcess         = new G4OpAbsorption();
-  G4OpRayleigh* fRayleighScatteringProcess = new G4OpRayleigh();
-  G4OpMieHG* fMieHGScatteringProcess    = new G4OpMieHG();
-  PrtOpBoundaryProcess* fBoundaryProcess           = new PrtOpBoundaryProcess();
-
+  G4Cerenkov *theCerenkovProcess = new G4Cerenkov("Cerenkov");
   // cout << "End of bogus warning message" << endl << endl;
   G4Scintillation* theScintillationProcess      = new G4Scintillation("Scintillation");
 
@@ -496,66 +488,52 @@ int PHG4Reco::InitRun(PHCompositeNode *topNode)
     theCerenkovProcess->DumpPhysicsTable();
     }
   */
-  //theCerenkovProcess->SetMaxNumPhotonsPerStep(300);
-  //theCerenkovProcess->SetMaxBetaChangePerStep(10.0);
-  //theCerenkovProcess->SetTrackSecondariesFirst(false);  // current PHG4TruthTrackingAction does not support suspect active track and track secondary first
-
-  fCerenkovProcess->SetMaxNumPhotonsPerStep(20);
-  fCerenkovProcess->SetMaxBetaChangePerStep(10.0);
-  fCerenkovProcess->SetTrackSecondariesFirst(true);
-
-  cout << "Cerenkov process added" << endl;
+  theCerenkovProcess->SetMaxNumPhotonsPerStep(300);
+  theCerenkovProcess->SetMaxBetaChangePerStep(10.0);
+  theCerenkovProcess->SetTrackSecondariesFirst(false);  // current PHG4TruthTrackingAction does not support suspect active track and track secondary first
 
   theScintillationProcess->SetScintillationYieldFactor(1.0);
-  theScintillationProcess->SetTrackSecondariesFirst(true);
+  theScintillationProcess->SetTrackSecondariesFirst(false);
   // theScintillationProcess->SetScintillationExcitationRatio(1.0);
 
   // Use Birks Correction in the Scintillation process
 
-  G4EmSaturation* emSaturation = G4LossTableManager::Instance()->EmSaturation();
-  theScintillationProcess->AddSaturation(emSaturation);
+  // G4EmSaturation* emSaturation = G4LossTableManager::Instance()->EmSaturation();
+  // theScintillationProcess->AddSaturation(emSaturation);
 
   G4ParticleTable *theParticleTable = G4ParticleTable::GetParticleTable();
   G4ParticleTable::G4PTblDicIterator *_theParticleIterator;
   _theParticleIterator = theParticleTable->GetIterator();
   _theParticleIterator->reset();
   while ((*_theParticleIterator)())
-  {
-    G4ParticleDefinition *particle = _theParticleIterator->value();
-    G4String particleName = particle->GetParticleName();
-    G4ProcessManager *pmanager = particle->GetProcessManager();
-    if (fCerenkovProcess->IsApplicable(*particle))
     {
-      pmanager->AddProcess(fCerenkovProcess);
-      pmanager->SetProcessOrdering(fCerenkovProcess, idxPostStep);
+      G4ParticleDefinition *particle = _theParticleIterator->value();
+      G4String particleName = particle->GetParticleName();
+      G4ProcessManager *pmanager = particle->GetProcessManager();
+      if (theCerenkovProcess->IsApplicable(*particle))
+	{
+	  pmanager->AddProcess(theCerenkovProcess);
+	  pmanager->SetProcessOrdering(theCerenkovProcess, idxPostStep);
+	}
+      if (theScintillationProcess->IsApplicable(*particle))
+	{
+	  pmanager->AddProcess(theScintillationProcess);
+	  pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
+	  pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
+	}
+      for (PHG4Subsystem *g4sub: m_SubsystemList)
+	{
+	  g4sub->AddProcesses(particle);
+	}
     }
-  
-    if (theScintillationProcess->IsApplicable(*particle))
-    {
-      //pmanager->AddProcess(theScintillationProcess);
-      //pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
-      //pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
-    }
-  
-
-    /*G4ProcessManager *pmanager = G4OpticalPhoton::OpticalPhoton()->GetProcessManager();
-  std::cout << " AddDiscreteProcess to OpticalPhoton " << std::endl;
+  G4ProcessManager *pmanager = G4OpticalPhoton::OpticalPhoton()->GetProcessManager();
+  // std::cout << " AddDiscreteProcess to OpticalPhoton " << std::endl;
   pmanager->AddDiscreteProcess(new G4OpAbsorption());
   pmanager->AddDiscreteProcess(new G4OpRayleigh());
   pmanager->AddDiscreteProcess(new G4OpMieHG());
   pmanager->AddDiscreteProcess(new G4OpBoundaryProcess());
   pmanager->AddDiscreteProcess(new G4OpWLS());
   pmanager->AddDiscreteProcess(new G4PhotoElectricEffect());
-    */
-  if (particleName == "opticalphoton") {
-  G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
-  pmanager->AddDiscreteProcess(fAbsorptionProcess);
-  pmanager->AddDiscreteProcess(fRayleighScatteringProcess);
-  pmanager->AddDiscreteProcess(fMieHGScatteringProcess);
-  pmanager->AddDiscreteProcess(fBoundaryProcess);
-  }
-  }
-  
   // pmanager->DumpInfo();
 
   // needs large amount of memory which kills central hijing events
@@ -643,7 +621,7 @@ int PHG4Reco::process_event(PHCompositeNode *topNode)
   PHG4InEvent *ineve = findNode::getClass<PHG4InEvent>(topNode, "PHG4INEVENT");
   m_GeneratorAction->SetInEvent(ineve);
 
-  BOOST_FOREACH (SubsysReco *reco, m_SubsystemList)
+  for (SubsysReco *reco: m_SubsystemList)
   {
     if (Verbosity() >= 2)
       cout << "PHG4Reco::process_event - " << reco->Name() << "->process_event" << endl;
@@ -670,7 +648,7 @@ int PHG4Reco::process_event(PHCompositeNode *topNode)
   }
   m_RunManager->BeamOn(1);
 
-  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)
+  for (PHG4Subsystem *g4sub: m_SubsystemList)
   {
     if (Verbosity() >= 2)
       cout << " PHG4Reco::process_event - " << g4sub->Name() << "->process_after_geant" << endl;
@@ -691,7 +669,7 @@ int PHG4Reco::process_event(PHCompositeNode *topNode)
 
 int PHG4Reco::ResetEvent(PHCompositeNode *topNode)
 {
-  BOOST_FOREACH (SubsysReco *reco, m_SubsystemList)
+  for (SubsysReco *reco: m_SubsystemList)
   {
     reco->ResetEvent(topNode);
   }
@@ -700,7 +678,7 @@ int PHG4Reco::ResetEvent(PHCompositeNode *topNode)
 
 void PHG4Reco::Print(const std::string &what) const
 {
-  BOOST_FOREACH (SubsysReco *reco, m_SubsystemList)
+  for (SubsysReco *reco: m_SubsystemList)
   {
     if (what.empty() || what == "ALL" || (reco->Name()).find(what) != string::npos)
     {
@@ -1442,7 +1420,7 @@ void PHG4Reco::DefineRegions()
 PHG4Subsystem *
 PHG4Reco::getSubsystem(const string &name)
 {
-  BOOST_FOREACH (PHG4Subsystem *subsys, m_SubsystemList)
+  for (PHG4Subsystem *subsys: m_SubsystemList)
   {
     if (subsys->Name() == name)
     {
@@ -1473,7 +1451,7 @@ void PHG4Reco::ApplyDisplayAction()
   }
   G4VPhysicalVolume *physworld = m_Detector->GetPhysicalVolume();
   m_DisplayAction->ApplyDisplayAction(physworld);
-  BOOST_FOREACH (PHG4Subsystem *g4sub, m_SubsystemList)  //for (PHG4Subsystem g4sub: m_SubsystemList)
+  for (PHG4Subsystem *g4sub: m_SubsystemList)
   {
     PHG4DisplayAction *action = g4sub->GetDisplayAction();
     if (action)
