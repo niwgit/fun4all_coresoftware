@@ -5,11 +5,8 @@
 
 #include <g4main/PHG4Detector.h>
 
-#include <cassert>
-#include <map>
 #include <set>
 #include <string>
-#include <utility>                // for pair, make_pair
 
 class G4LogicalVolume;
 class G4VPhysicalVolume;
@@ -26,17 +23,17 @@ class PHG4ZDCDetector : public PHG4Detector
 {
  public:
   //! constructor
-  PHG4ZDCDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam);
+  explicit PHG4ZDCDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam, const int detid);
 
   //! destructor
-  virtual ~PHG4ZDCDetector() {}
+  ~PHG4ZDCDetector() override {}
 
   //! construct
-  virtual void ConstructMe(G4LogicalVolume *world);
+  void ConstructMe(G4LogicalVolume *world) override;
 
   //!@name volume accessors
   int IsInZDC(G4VPhysicalVolume *) const;
-  
+
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
 
@@ -46,21 +43,20 @@ class PHG4ZDCDetector : public PHG4Detector
 
  private:
   G4LogicalVolume *ConstructTower(int type);
-  
+  PHParameters *GetParams() const { return m_Params; }
 
-  PHG4ZDCDisplayAction *m_DisplayAction;
-  PHParameters *m_Params;
+  PHG4ZDCDisplayAction *m_DisplayAction = nullptr;
+  PHParameters *m_Params = nullptr;
   //! registry for volumes that should not be exported, i.e. fibers
-  PHG4GDMLConfig *m_GdmlConfig;
-  
-  bool m_Window;
+  PHG4GDMLConfig *m_GdmlConfig = nullptr;
+
   /* ZDC geometry */
   double m_Angle;
 
   double m_TPlate;
   double m_HPlate;
   double m_WPlate;
-  
+
   double m_TAbsorber;
   double m_HAbsorber;
   double m_WAbsorber;
@@ -72,14 +68,6 @@ class PHG4ZDCDetector : public PHG4Detector
 
   double m_Gap;
 
-  double m_XRot;
-  double m_YRot;
-  double m_ZRot;
-
-  double m_PlaceX;
-  double m_PlaceY;
-  double m_PlaceZ;
-
   double m_TSMD;
   double m_HSMD;
   double m_WSMD;
@@ -87,40 +75,26 @@ class PHG4ZDCDetector : public PHG4Detector
   double m_RHole;
   double m_TWin;
   double m_RWin;
-  
+
   double m_PlaceHole;
   double m_Pxwin;
   double m_Pywin;
   double m_Pzwin;
-  
 
   int m_NMod;
   int m_NLay;
 
   int m_ActiveFlag;
   int m_AbsorberActiveFlag;
+  int m_SupportActiveFlag;
   int m_Layer;
 
   std::string m_SuperDetector;
-  
 
   std::set<G4LogicalVolume *> m_AbsorberLogicalVolSet;
   std::set<G4LogicalVolume *> m_ScintiLogicalVolSet;
   std::set<G4LogicalVolume *> m_FiberLogicalVolSet;
-
- protected:
- 
-  PHParameters *GetParams() const { return m_Params; }
-  void AbsorberLogicalVolSetInsert(G4LogicalVolume *logvol)
-  {
-    m_AbsorberLogicalVolSet.insert(logvol);
-  }
-  void ScintiLogicalVolSetInsert(G4LogicalVolume *logvol)
-  {
-    m_ScintiLogicalVolSet.insert(logvol);
-  }
- 
- 
+  std::set<G4LogicalVolume *> m_SupportLogicalVolSet;
 };
 
 #endif

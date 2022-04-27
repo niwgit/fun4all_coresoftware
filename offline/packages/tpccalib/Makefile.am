@@ -29,15 +29,18 @@ libtpccalib_la_LIBADD = \
   -lSubsysReco \
   -lg4detectors_io \
   -ltrack_io \
-  -ltrackbase_historic_io
+  -ltrackbase_historic_io \
+  -ltpc_io
 
 pkginclude_HEADERS = \
+  TpcDirectLaserReconstruction.h \
   TpcSpaceChargeMatrixContainer.h \
   TpcSpaceChargeMatrixContainerv1.h \
   TpcSpaceChargeMatrixInversion.h \
   TpcSpaceChargeReconstruction.h \
   TpcSpaceChargeReconstructionHelper.h \
-  PHTpcResiduals.h
+  PHTpcResiduals.h \
+  PHTpcCentralMembraneClusterizer.h
 
 ROOTDICTS = \
   TpcSpaceChargeMatrixContainer_Dict.cc \
@@ -53,10 +56,12 @@ libtpccalib_io_la_SOURCES = \
   TpcSpaceChargeMatrixContainerv1.cc 
 
 libtpccalib_la_SOURCES = \
+  TpcDirectLaserReconstruction.cc \
   TpcSpaceChargeMatrixInversion.cc \
   TpcSpaceChargeReconstruction.cc \
   TpcSpaceChargeReconstructionHelper.cc \
-  PHTpcResiduals.cc
+  PHTpcResiduals.cc \
+  PHTpcCentralMembraneClusterizer.cc
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h
