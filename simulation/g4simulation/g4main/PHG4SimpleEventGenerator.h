@@ -101,8 +101,10 @@ class PHG4SimpleEventGenerator : public PHG4ParticleGeneratorBase
   FUNCTION m_VertexSizeFunc_r = Uniform;
   double m_VertexSizeMean = 0.;
   double m_VertexSizeWidth = 0.;
-  double m_EtaMin = -1.25;
-  double m_EtaMax = 1.25;
+  //double m_EtaMin = -1.25;
+  //double m_EtaMax = 1.25;
+  double m_EtaMin = NAN;
+  double m_EtaMax = NAN;
   double m_ThetaMin = NAN;
   double m_ThetaMax = NAN;
   double m_PhiMin = -M_PI;

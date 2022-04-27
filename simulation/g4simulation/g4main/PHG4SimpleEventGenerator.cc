@@ -65,11 +65,11 @@ void PHG4SimpleEventGenerator::set_theta_range(const double min, const double ma
     std::cout << __PRETTY_FUNCTION__ << " thetamin " << min << " > thetamax: " << max << std::endl;
     gSystem->Exit(1);
   }
-  if (min < 0 || max > M_PI)
+  /*if (min < 0 || max > M_PI)
   {
     std::cout << __PRETTY_FUNCTION__ << " min or max outside range (range is 0 to pi) min: " << min << ", max: " << max << std::endl;
     gSystem->Exit(1);
-  }
+    }*/
   m_ThetaMin = min;
   m_ThetaMax = max;
   m_EtaMin = NAN;
@@ -341,14 +341,17 @@ int PHG4SimpleEventGenerator::process_event(PHCompositeNode *topNode)
       ++trackid;
 
       double eta;
+      double theta = 0.;
       if (!std::isnan(m_EtaMin) && !std::isnan(m_EtaMax))
       {
         eta = (m_EtaMax - m_EtaMin) * gsl_rng_uniform_pos(RandomGenerator()) + m_EtaMin;
       }
       else if (!std::isnan(m_ThetaMin) && !std::isnan(m_ThetaMax))
       {
-        double theta = (m_ThetaMax - m_ThetaMin) * gsl_rng_uniform_pos(RandomGenerator()) + m_ThetaMin;
-        eta = PHG4Utils::get_eta(theta);
+        theta = (m_ThetaMax - m_ThetaMin) * gsl_rng_uniform_pos(RandomGenerator()) + m_ThetaMin;
+        //eta = PHG4Utils::get_eta(theta);
+	if(theta > M_PI) eta = PHG4Utils::get_eta(M_PI - (theta - M_PI)); 
+        else eta = PHG4Utils::get_eta(theta);
       }
       else
       {
@@ -390,12 +393,17 @@ int PHG4SimpleEventGenerator::process_event(PHCompositeNode *topNode)
         exit(-1);
       }
 
-      double px = pt * cos(phi);
+      double px;
+      if(theta > M_PI) px = -(pt * cos(phi));
+      else px = pt * cos(phi);
+
+      //double px = pt * cos(phi);
       double py = pt * sin(phi);
       double pz = pt * sinh(eta);
       double m = get_mass(pdgcode);
       double e = sqrt(px * px + py * py + pz * pz + m * m);
-
+      //std::cout << "px: " << px << ", py: " << py << ", pz: " << pz << ", m: " << m << ", e: " << e << std::endl;
+      
       PHG4Particle *particle = new PHG4Particlev2();
       particle->set_track_id(trackid);
       particle->set_vtx_id(vtxindex);
